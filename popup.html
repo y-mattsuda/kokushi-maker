@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+  <head>
+    <title>プロンプト選択</title>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: "Roboto", "Noto Sans JP", system-ui, sans-serif;
+        background-color: #fafafa;
+        color: #202124;
+        width: 260px;
+        padding: 20px;
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 20px;
+        font-weight: 500;
+        text-align: center;
+        margin-bottom: 16px;
+        color: #202124;
+      }
+
+      p {
+        font-size: 13px;
+        margin: 8px 0;
+        color: #5f6368;
+      }
+
+      #subjectCheckboxes {
+        border: 1px solid #dadce0;
+        border-radius: 6px;
+        padding: 10px;
+        max-height: 150px;
+        overflow-y: auto;
+        background-color: #fff;
+      }
+
+      #subjectCheckboxes div {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      label {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 10px;
+        font-size: 13px;
+        cursor: pointer;
+        color: #3c4043;
+      }
+
+      input[type="radio"] {
+        accent-color: #1a73e8;
+        margin-right: 4px;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        border: none;
+        border-radius: 24px;
+        background-color: #1a73e8;
+        color: white;
+        cursor: pointer;
+        transition:
+          box-shadow 0.2s,
+          background-color 0.2s;
+        box-shadow:
+          0 1px 3px rgba(60, 64, 67, 0.3),
+          0 4px 8px rgba(60, 64, 67, 0.15);
+      }
+
+      button:hover {
+        background-color: #1765cc;
+        box-shadow: 0 2px 6px rgba(60, 64, 67, 0.3);
+      }
+
+      button:active {
+        background-color: #155ab8;
+      }
+
+      #feedback {
+        text-align: center;
+        color: #1a73e8;
+        font-weight: 500;
+        font-size: 13px;
+        margin-top: 10px;
+        height: 22px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>プロンプト作成</h1>
+    <p>科目を選択してください:</p>
+    <div id="subjectCheckboxes">
+      <div>
+        <label><input type="checkbox" id="selectAllSubjects" /> 全科目</label>
+      </div>
+      <hr style="border: none; border-top: 1px solid #dadce0; margin: 8px 0;" />
+      <div><label><input type="checkbox" class="subject-checkbox" value="A 消化管" /> A 消化管</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="B 肝・胆・膵" /> B 肝・胆・膵</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="C 循環器" /> C 循環器</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="D 代謝・内分泌" /> D 代謝・内分泌</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="E 腎・泌尿器" /> E 腎・泌尿器</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="F 免疫・膠原病" /> F 免疫・膠原病</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="G 血液" /> G 血液</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="H 感染症" /> H 感染症</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="I 呼吸器" /> I 呼吸器</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="J 神経" /> J 神経</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="K 中毒" /> K 中毒</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="L 救急" /> L 救急</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="M 麻酔科" /> M 麻酔科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="N 医学総論" /> N 医学総論</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="O 小児科" /> O 小児科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="P 婦人科" /> P 婦人科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="Q 産科" /> Q 産科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="R 眼科" /> R 眼科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="S 耳鼻咽喉科" /> S 耳鼻咽喉科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="T 整形外科" /> T 整形外科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="U 精神科" /> U 精神科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="V 皮膚科" /> V 皮膚科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="W 泌尿器科" /> W 泌尿器科</label></div>
+      <div><label><input type="checkbox" class="subject-checkbox" value="X 放射線科" /> X 放射線科</label></div>
+    </div>
+    <br /><br />
+    <p>モードを選択してください:</p>
+    <label><input type="radio" name="mode" value="a" checked /> a分類</label>
+    <label><input type="radio" name="mode" value="b" /> b分類</label>
+    <label><input type="radio" name="mode" value="c" /> c分類</label>
+    <label><input type="radio" name="mode" value="all" /> 全分類</label>
+    <br /><br />
+    <button id="copyBtn">プロンプトをコピー</button>
+    <p id="feedback"></p>
+    <script src="popup.js"></script>
+  </body>
+</html>

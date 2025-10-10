@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Gemini プロンプト自動入力",
+  "version": "1.0",
+  "description": "Geminiの入力欄に指定したプロンプトを自動入力し、送信します。",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://gemini.google.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://gemini.google.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
