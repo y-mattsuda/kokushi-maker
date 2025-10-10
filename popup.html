@@ -27,6 +27,12 @@
         color: #5f6368;
       }
 
+      hr {
+        border: none;
+        border-top: 1px solid #dadce0;
+        margin: 16px 0;
+      }
+
       #subjectCheckboxes {
         border: 1px solid #dadce0;
         border-radius: 6px;
@@ -62,25 +68,42 @@
         font-weight: 500;
         border: none;
         border-radius: 24px;
-        background-color: #1a73e8;
         color: white;
         cursor: pointer;
         transition:
           box-shadow 0.2s,
           background-color 0.2s;
+      }
+
+      #copyBtn {
+        background-color: #1a73e8;
         box-shadow:
           0 1px 3px rgba(60, 64, 67, 0.3),
           0 4px 8px rgba(60, 64, 67, 0.15);
       }
-
-      button:hover {
+      #copyBtn:hover {
         background-color: #1765cc;
         box-shadow: 0 2px 6px rgba(60, 64, 67, 0.3);
       }
-
-      button:active {
+      #copyBtn:active {
         background-color: #155ab8;
       }
+
+      #activateViewerBtn {
+        background-color: #34a853; /* Green color */
+        box-shadow:
+          0 1px 3px rgba(60, 64, 67, 0.3),
+          0 4px 8px rgba(60, 64, 67, 0.15);
+        margin-bottom: 16px;
+      }
+      #activateViewerBtn:hover {
+        background-color: #2e944b;
+        box-shadow: 0 2px 6px rgba(60, 64, 67, 0.3);
+      }
+      #activateViewerBtn:active {
+        background-color: #298042;
+      }
+
 
       #feedback {
         text-align: center;
@@ -93,7 +116,13 @@
     </style>
   </head>
   <body>
-    <h1>プロンプト作成</h1>
+    <h1>国試メーカー</h1>
+
+    <button id="activateViewerBtn">Viewerを起動</button>
+
+    <hr />
+
+    <p><strong>プロンプト作成機能</strong></p>
     <p>科目を選択してください:</p>
     <div id="subjectCheckboxes">
       <div>

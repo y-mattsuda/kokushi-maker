@@ -1526,6 +1526,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const subjectCheckboxes = document.querySelectorAll('.subject-checkbox');
   const copyBtn = document.getElementById('copyBtn');
   const feedbackElement = document.getElementById('feedback');
+  const activateViewerBtn = document.getElementById('activateViewerBtn');
+
+  // --- Viewer起動ボタンの処理 ---
+  activateViewerBtn.addEventListener('click', () => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "activateViewer" }, (response) => {
+          if (chrome.runtime.lastError) {
+            feedbackElement.textContent = "起動に失敗しました。";
+            feedbackElement.style.color = "red";
+            console.error(chrome.runtime.lastError.message);
+          } else if (response && response.status === "success") {
+            feedbackElement.textContent = "Viewerを起動しました！";
+            feedbackElement.style.color = "#34a853";
+            setTimeout(() => window.close(), 1500);
+          } else {
+            feedbackElement.textContent = (response && response.message) || "対象が見つかりません。";
+            feedbackElement.style.color = "orange";
+          }
+        });
+      }
+    });
+  });
+
+  // --- 以下、プロンプト作成機能 (既存のコード) ---
 
   // チェックボックスの状態を保存する関数
   const saveCheckboxState = () => {
@@ -1560,7 +1585,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // 各科目チェックボックスのイベントリスナー
   subjectCheckboxes.forEach(checkbox => {
     checkbox.addEventListener('change', () => {
-      // すべての科目がチェックされたら「全科目」もチェック
       if ([...subjectCheckboxes].every(cb => cb.checked)) {
         selectAllCheckbox.checked = true;
       } else {
@@ -1570,7 +1594,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // プロンプト作成関数（変更なし）
+  // プロンプト作成関数
   function createPromptForA(subjects) {
     const filtered = groupA.filter(item => subjects.includes(item[0]));
     if (filtered.length === 0) return null;
@@ -1612,36 +1636,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (subjectsToUse.length === 0) {
       feedbackElement.textContent = "科目を選択してください。";
       feedbackElement.style.color = "red";
-      setTimeout(() => {
-        feedbackElement.textContent = "";
-        feedbackElement.style.color = "#1a73e8"; // Reset color
-      }, 2000);
+      setTimeout(() => { feedbackElement.textContent = ""; feedbackElement.style.color = "#1a73e8"; }, 2000);
       return;
     }
 
     let promptText = "";
     switch (selectedMode) {
-      case "a":
-        promptText = createPromptForA(subjectsToUse);
-        break;
-      case "b":
-        promptText = createPromptForB(subjectsToUse);
-        break;
-      case "c":
-        promptText = createPromptForC(subjectsToUse);
-        break;
-      case "all":
-        promptText = createPromptForAll(subjectsToUse);
-        break;
+      case "a": promptText = createPromptForA(subjectsToUse); break;
+      case "b": promptText = createPromptForB(subjectsToUse); break;
+      case "c": promptText = createPromptForC(subjectsToUse); break;
+      case "all": promptText = createPromptForAll(subjectsToUse); break;
     }
 
     if (!promptText) {
         feedbackElement.textContent = "該当する問題がありません。";
         feedbackElement.style.color = "orange";
-        setTimeout(() => {
-          feedbackElement.textContent = "";
-          feedbackElement.style.color = "#1a73e8"; // Reset color
-        }, 2000);
+        setTimeout(() => { feedbackElement.textContent = ""; feedbackElement.style.color = "#1a73e8"; }, 2000);
         return;
     }
 
@@ -1649,10 +1659,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .writeText(promptText)
       .then(() => {
         feedbackElement.textContent = "コピーしました！";
-        setTimeout(() => {
-          feedbackElement.textContent = "";
-          window.close();
-        }, 2000);
+        setTimeout(() => { feedbackElement.textContent = ""; window.close(); }, 2000);
       })
       .catch((err) => {
         console.error("クリップボードへの書き込みに失敗しました:", err);
