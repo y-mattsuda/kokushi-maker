@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Gemini プロンプト自動入力",
+  "name": "kokushi-maker",
   "version": "1.0",
-  "description": "Geminiの入力欄に指定したプロンプトを自動入力し、送信します。",
+  "description": "医師国試向けの問題演習をGeminiと行うためのChrome拡張機能",
   "permissions": [
     "activeTab",
     "scripting",
