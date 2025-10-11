@@ -148,7 +148,7 @@ const groupA = [
   ["I 呼吸器", "テーマ: B 肺実質感染症, 疾患名: ① 市中肺炎, keyword: 細菌、非定型病原体"],
   ["I 呼吸器", "テーマ: B 肺実質感染症, 疾患名: ② 院内肺炎, keyword: 耐性菌、日和見感染症<opportunistic infection>"],
   ["I 呼吸器", "テーマ: B 肺実質感染症, 疾患名: ③ 医療・介護関連肺炎, keyword: 嚥下性肺疾患"],
-  ["I 呼吸器", "テーマ: C 肺真菌症, 疾患名: ① アスペルギルス症、クリプトコックス症、カンジダ症、ニューモシスチス肺炎"],
+  ["I 呼吸器", "テーマ: C 肺真菌症, 疾患名: ① アスペルギルス症、クリプトコックス症、カンジда症、ニューモシスチス肺炎"],
   ["I 呼吸器", "テーマ: D 抗酸菌症, 疾患名: ① 肺結核症"],
   ["I 呼吸器", "テーマ: D 抗酸菌症, 疾患名: ② 非結核性抗酸菌症, keyword: M. avium, M. intracellulare, M. kansasii"],
   ["I 呼吸器", "テーマ: E ウイルス, 疾患名: ① インフルエンザ、サイトメガロウイルス肺炎"],
@@ -1522,8 +1522,10 @@ const groupC = [
 
 // DOM読み込み後に処理を実行
 document.addEventListener('DOMContentLoaded', () => {
-  const selectAllCheckbox = document.getElementById('selectAllSubjects');
+  const selectAllSubjects = document.getElementById('selectAllSubjects');
   const subjectCheckboxes = document.querySelectorAll('.subject-checkbox');
+  const selectAllModes = document.getElementById('selectAllModes');
+  const modeCheckboxes = document.querySelectorAll('.mode-checkbox');
   const copyBtn = document.getElementById('copyBtn');
   const feedbackElement = document.getElementById('feedback');
   const activateViewerBtn = document.getElementById('activateViewerBtn');
@@ -1534,7 +1536,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, { action: "activateViewer" }, (response) => {
           if (chrome.runtime.lastError) {
-            feedbackElement.textContent = "起動に失敗しました。";
+            feedbackElement.textContent = "起動に失敗。ページを再読込して下さい";
             feedbackElement.style.color = "red";
             console.error(chrome.runtime.lastError.message);
           } else if (response && response.status === "success") {
@@ -1550,124 +1552,100 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- 以下、プロンプト作成機能 (既存のコード) ---
+  // --- プロンプト作成機能 ---
 
-  // チェックボックスの状態を保存する関数
-  const saveCheckboxState = () => {
+  // チェックボックスの状態を保存/読み込みする汎用関数
+  const saveCheckboxStates = () => {
     const subjectsState = {};
-    subjectCheckboxes.forEach(checkbox => {
-      subjectsState[checkbox.value] = checkbox.checked;
+    subjectCheckboxes.forEach(cb => { subjectsState[cb.value] = cb.checked; });
+    subjectsState['selectAll'] = selectAllSubjects.checked;
+
+    const modesState = {};
+    modeCheckboxes.forEach(cb => { modesState[cb.value] = cb.checked; });
+    modesState['selectAll'] = selectAllModes.checked;
+
+    chrome.storage.local.set({ 
+      savedSubjects: subjectsState,
+      savedModes: modesState 
     });
-    subjectsState['selectAll'] = selectAllCheckbox.checked;
-    chrome.storage.local.set({ savedSubjects: subjectsState });
   };
 
-  // 保存されたチェックボックスの状態を読み込む関数
-  const loadCheckboxState = () => {
-    chrome.storage.local.get('savedSubjects', (result) => {
+  const loadCheckboxStates = () => {
+    chrome.storage.local.get(['savedSubjects', 'savedModes'], (result) => {
       if (result.savedSubjects) {
-        subjectCheckboxes.forEach(checkbox => {
-          checkbox.checked = result.savedSubjects[checkbox.value] || false;
-        });
-        selectAllCheckbox.checked = result.savedSubjects['selectAll'] || false;
+        subjectCheckboxes.forEach(cb => { cb.checked = result.savedSubjects[cb.value] || false; });
+        selectAllSubjects.checked = result.savedSubjects['selectAll'] || false;
+      }
+      if (result.savedModes) {
+        modeCheckboxes.forEach(cb => { cb.checked = result.savedModes[cb.value] || false; });
+        selectAllModes.checked = result.savedModes['selectAll'] || false;
       }
     });
   };
 
-  // 「全科目」チェックボックスのイベントリスナー
-  selectAllCheckbox.addEventListener('change', (event) => {
-    subjectCheckboxes.forEach(checkbox => {
-      checkbox.checked = event.target.checked;
+  // チェックボックスの連動を管理する汎用関数
+  const setupSelectAll = (selectAll, allCheckboxes) => {
+    selectAll.addEventListener('change', (e) => {
+      allCheckboxes.forEach(cb => { cb.checked = e.target.checked; });
+      saveCheckboxStates();
     });
-    saveCheckboxState(); // 変更を保存
-  });
-
-  // 各科目チェックボックスのイベントリスナー
-  subjectCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', () => {
-      if ([...subjectCheckboxes].every(cb => cb.checked)) {
-        selectAllCheckbox.checked = true;
-      } else {
-        selectAllCheckbox.checked = false;
-      }
-      saveCheckboxState(); // 変更を保存
+    allCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        selectAll.checked = [...allCheckboxes].every(cb => cb.checked);
+        saveCheckboxStates();
+      });
     });
-  });
+  };
 
-  // プロンプト作成関数
-  function createPromptForA(subjects) {
-    const filtered = groupA.filter(item => subjects.includes(item[0]));
-    if (filtered.length === 0) return null;
-    return filtered[Math.floor(Math.random() * filtered.length)][1];
-  }
-
-  function createPromptForB(subjects) {
-    const filtered = groupB.filter(item => subjects.includes(item[0]));
-    if (filtered.length === 0) return null;
-    return filtered[Math.floor(Math.random() * filtered.length)][1];
-  }
-
-  function createPromptForC(subjects) {
-    const filtered = groupC.filter(item => subjects.includes(item[0]));
-    if (filtered.length === 0) return null;
-    return filtered[Math.floor(Math.random() * filtered.length)][1];
-  }
-
-  function createPromptForAll(subjects) {
-    const allGroups = [...groupA, ...groupB, ...groupC];
-    const filtered = allGroups.filter(item => subjects.includes(item[0]));
-    if (filtered.length === 0) return null;
-    return filtered[Math.floor(Math.random() * filtered.length)][1];
-  }
+  setupSelectAll(selectAllSubjects, subjectCheckboxes);
+  setupSelectAll(selectAllModes, modeCheckboxes);
 
   // コピーボタンのクリックイベント
   copyBtn.addEventListener("click", () => {
-    const selectedMode = document.querySelector('input[name="mode"]:checked').value;
-    const selectAllChecked = selectAllCheckbox.checked;
+    // 選択された科目を取得
     const checkedSubjects = [...document.querySelectorAll('.subject-checkbox:checked')].map(cb => cb.value);
-
-    let subjectsToUse = [];
-    if (selectAllChecked) {
-      subjectsToUse = [...subjectCheckboxes].map(cb => cb.value);
-    } else {
-      subjectsToUse = checkedSubjects;
-    }
-
-    if (subjectsToUse.length === 0) {
-      feedbackElement.textContent = "科目を選択してください。";
+    if (checkedSubjects.length === 0) {
+      feedbackElement.textContent = "科目を1つ以上選択してください。";
       feedbackElement.style.color = "red";
-      setTimeout(() => { feedbackElement.textContent = ""; feedbackElement.style.color = "#1a73e8"; }, 2000);
       return;
     }
 
-    let promptText = "";
-    switch (selectedMode) {
-      case "a": promptText = createPromptForA(subjectsToUse); break;
-      case "b": promptText = createPromptForB(subjectsToUse); break;
-      case "c": promptText = createPromptForC(subjectsToUse); break;
-      case "all": promptText = createPromptForAll(subjectsToUse); break;
+    // 選択されたモードに対応する問題グループを結合
+    const selectedModes = [...document.querySelectorAll('.mode-checkbox:checked')].map(cb => cb.value);
+    if (selectedModes.length === 0) {
+      feedbackElement.textContent = "モードを1つ以上選択してください。";
+      feedbackElement.style.color = "red";
+      return;
     }
 
-    if (!promptText) {
-        feedbackElement.textContent = "該当する問題がありません。";
-        feedbackElement.style.color = "orange";
-        setTimeout(() => { feedbackElement.textContent = ""; feedbackElement.style.color = "#1a73e8"; }, 2000);
-        return;
+    let combinedGroups = [];
+    if (selectedModes.includes('a')) combinedGroups.push(...groupA);
+    if (selectedModes.includes('b')) combinedGroups.push(...groupB);
+    if (selectedModes.includes('c')) combinedGroups.push(...groupC);
+
+    // 科目でフィルタリング
+    const filteredBySubject = combinedGroups.filter(item => checkedSubjects.includes(item[0]));
+
+    if (filteredBySubject.length === 0) {
+      feedbackElement.textContent = "該当する問題がありません。";
+      feedbackElement.style.color = "orange";
+      return;
     }
 
-    navigator.clipboard
-      .writeText(promptText)
-      .then(() => {
-        feedbackElement.textContent = "コピーしました！";
-        setTimeout(() => { feedbackElement.textContent = ""; window.close(); }, 2000);
-      })
-      .catch((err) => {
-        console.error("クリップボードへの書き込みに失敗しました:", err);
-        feedbackElement.textContent = "コピーに失敗";
-        feedbackElement.style.color = "red";
-      });
+    // ランダムにプロンプトを選択
+    const promptText = filteredBySubject[Math.floor(Math.random() * filteredBySubject.length)][1];
+
+    // クリップボードにコピー
+    navigator.clipboard.writeText(promptText).then(() => {
+      feedbackElement.textContent = "コピーしました！";
+      setTimeout(() => { feedbackElement.textContent = ""; window.close(); }, 1500);
+    }).catch((err) => {
+      console.error("クリップボードへの書き込みに失敗しました:", err);
+      feedbackElement.textContent = "コピーに失敗";
+      feedbackElement.style.color = "red";
+    });
   });
 
   // ページ読み込み時に保存された状態を復元
-  loadCheckboxState();
+  loadCheckboxStates();
 });
