@@ -8,7 +8,7 @@
         font-family: "Roboto", "Noto Sans JP", system-ui, sans-serif;
         background-color: #fafafa;
         color: #202124;
-        width: 260px;
+        width: 480px; /* 横幅を広げる */
         padding: 20px;
         margin: 0;
       }
@@ -33,6 +33,15 @@
         margin: 16px 0;
       }
 
+      .container {
+        display: flex;
+        gap: 20px; /* カラム間のスペース */
+      }
+
+      .column {
+        flex: 1; /* 各カラムが均等に幅を取る */
+      }
+
       #subjectCheckboxes, #modeCheckboxes {
         border: 1px solid #dadce0;
         border-radius: 6px;
@@ -40,8 +49,11 @@
         background-color: #fff;
       }
       #subjectCheckboxes {
-        max-height: 150px;
+        height: 180px; /* 高さを少し調整 */
         overflow-y: auto;
+      }
+      #modeCheckboxes {
+        height: 180px; /* 高さを合わせる */
       }
 
       #subjectCheckboxes div, #modeCheckboxes div {
@@ -82,6 +94,7 @@
         box-shadow:
           0 1px 3px rgba(60, 64, 67, 0.3),
           0 4px 8px rgba(60, 64, 67, 0.15);
+        margin-top: 16px;
       }
       #copyBtn:hover {
         background-color: #1765cc;
@@ -125,47 +138,52 @@
     <hr />
 
     <p><strong>プロンプト作成機能</strong></p>
-    <p>科目を選択してください:</p>
-    <div id="subjectCheckboxes">
-      <div>
-        <label><input type="checkbox" id="selectAllSubjects" /> 全科目</label>
+    <div class="container">
+      <div class="column">
+        <p>科目を選択してください:</p>
+        <div id="subjectCheckboxes">
+          <div>
+            <label><input type="checkbox" id="selectAllSubjects" /> 全科目</label>
+          </div>
+          <hr style="border: none; border-top: 1px solid #dadce0; margin: 8px 0;" />
+          <div><label><input type="checkbox" class="subject-checkbox" value="A 消化管" /> A 消化管</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="B 肝・胆・膵" /> B 肝・胆・膵</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="C 循環器" /> C 循環器</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="D 代謝・内分泌" /> D 代謝・内分泌</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="E 腎・泌尿器" /> E 腎・泌尿器</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="F 免疫・膠原病" /> F 免疫・膠原病</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="G 血液" /> G 血液</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="H 感染症" /> H 感染症</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="I 呼吸器" /> I 呼吸器</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="J 神経" /> J 神経</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="K 中毒" /> K 中毒</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="L 救急" /> L 救急</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="M 麻酔科" /> M 麻酔科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="N 医学総論" /> N 医学総論</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="O 小児科" /> O 小児科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="P 婦人科" /> P 婦人科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="Q 産科" /> Q 産科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="R 眼科" /> R 眼科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="S 耳鼻咽喉科" /> S 耳鼻咽喉科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="T 整形外科" /> T 整形外科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="U 精神科" /> U 精神科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="V 皮膚科" /> V 皮膚科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="W 泌尿器科" /> W 泌尿器科</label></div>
+          <div><label><input type="checkbox" class="subject-checkbox" value="X 放射線科" /> X 放射線科</label></div>
+        </div>
       </div>
-      <hr style="border: none; border-top: 1px solid #dadce0; margin: 8px 0;" />
-      <div><label><input type="checkbox" class="subject-checkbox" value="A 消化管" /> A 消化管</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="B 肝・胆・膵" /> B 肝・胆・膵</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="C 循環器" /> C 循環器</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="D 代謝・内分泌" /> D 代謝・内分泌</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="E 腎・泌尿器" /> E 腎・泌尿器</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="F 免疫・膠原病" /> F 免疫・膠原病</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="G 血液" /> G 血液</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="H 感染症" /> H 感染症</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="I 呼吸器" /> I 呼吸器</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="J 神経" /> J 神経</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="K 中毒" /> K 中毒</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="L 救急" /> L 救急</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="M 麻酔科" /> M 麻酔科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="N 医学総論" /> N 医学総論</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="O 小児科" /> O 小児科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="P 婦人科" /> P 婦人科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="Q 産科" /> Q 産科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="R 眼科" /> R 眼科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="S 耳鼻咽喉科" /> S 耳鼻咽喉科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="T 整形外科" /> T 整形外科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="U 精神科" /> U 精神科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="V 皮膚科" /> V 皮膚科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="W 泌尿器科" /> W 泌尿器科</label></div>
-      <div><label><input type="checkbox" class="subject-checkbox" value="X 放射線科" /> X 放射線科</label></div>
+      <div class="column">
+        <p>モードを選択してください:</p>
+        <div id="modeCheckboxes">
+            <div><label><input type="checkbox" id="selectAllModes" /> 全分類</label></div>
+            <hr style="border: none; border-top: 1px solid #dadce0; margin: 8px 0;" />
+            <div><label><input type="checkbox" class="mode-checkbox" value="a" checked /> a分類</label></div>
+            <div><label><input type="checkbox" class="mode-checkbox" value="b" /> b分類</label></div>
+            <div><label><input type="checkbox" class="mode-checkbox" value="c" /> c分類</label></div>
+        </div>
+      </div>
     </div>
-    <br />
-    <p>モードを選択してください:</p>
-    <div id="modeCheckboxes">
-        <div><label><input type="checkbox" id="selectAllModes" /> 全分類</label></div>
-        <hr style="border: none; border-top: 1px solid #dadce0; margin: 8px 0;" />
-        <div><label><input type="checkbox" class="mode-checkbox" value="a" checked /> a分類</label></div>
-        <div><label><input type="checkbox" class="mode-checkbox" value="b" /> b分類</label></div>
-        <div><label><input type="checkbox" class="mode-checkbox" value="c" /> c分類</label></div>
-    </div>
-    <br /><br />
+
     <button id="copyBtn">プロンプトをコピー</button>
     <p id="feedback"></p>
     <script src="popup.js"></script>
