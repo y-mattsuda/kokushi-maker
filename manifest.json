@@ -3,6 +3,11 @@
   "name": "kokushi-maker",
   "version": "1.0",
   "description": "医師国試向けの問題演習をGeminiと行うためのChrome拡張機能",
+  "icons": {
+    "16": "assets/logo_16.png",
+    "48": "assets/logo_48.png",
+    "128": "assets/logo_128.png"
+  },
   "permissions": [
     "activeTab",
     "scripting",
