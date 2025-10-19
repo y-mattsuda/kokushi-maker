@@ -4,7 +4,7 @@
  * 
  * 機能:
  * 1. Geminiプロンプトの不可視化 (既存機能)
- * 2. インタラクティブな問題Viewerの起動 (新規機能・改10)
+ * 2. インタラクティブな問題Viewerの起動 (新規機能・改14)
  * ==============================================================================
  */
 
@@ -37,100 +37,95 @@ const setupInputAreaListener = () => {
 
 /**
  * ==============================================================================
- * 機能2: インタラクティブ問題Viewer (改10)
+ * 機能2: インタラクティブ問題Viewer (改14)
  * ==============================================================================
  */
 
 const PROCESSED_MARKER = 'data-interactive-quiz-processed';
 
-// テキストを解析して問題データを抽出する関数
 function parseQuizText(text) {
   try {
     const normalizedText = text.replace(/\r\n|\r/g, '\n');
-    const parts = normalizedText.split(/解答[・と]解説/);
-    if (parts.length < 2) {
-        console.error('[Quiz Parser] Failed to split by "解答・解説".');
-        return null;
-    }
+    const parts = normalizedText.split('解答と解説');
+    if (parts.length < 2) return null;
 
     const problemPart = parts[0];
     const solutionPart = parts[1];
 
-    const casePresentation = problemPart.split(/\n?\s*問1/)[0].trim();
+    const casePresentation = problemPart.split(/\n*\s*\[問1\]/)[0].trim();
 
-    const problemSplits = problemPart.split(/\n?\s*問[1-9][0-9]?/).slice(1);
-    const solutionSplits = solutionPart.split(/\n?\s*問[1-9][0-9]?/).slice(1);
+    const blockRegex = /(?=\n*\s*\[問[1-9][0-9]?\])/;
+    
+    const problemBlocks = problemPart.split(blockRegex).filter(s => s.trim().startsWith('['));
+    let solutionBlocks = solutionPart.split(blockRegex).filter(s => s.trim().length > 0);
 
-    if (problemSplits.length === 0) {
-        console.error('[Quiz Parser] No problem blocks found after splitting by "問X".');
-        return null;
-    }
-    if (solutionSplits.length === 0 || problemSplits.length !== solutionSplits.length) {
-        console.error('[Quiz Parser] Mismatch between problem and solution block counts.', {problems: problemSplits.length, solutions: solutionSplits.length});
-        return null;
+    if (solutionBlocks.length > 0 && !solutionBlocks[0].includes('正答') && !solutionBlocks[0].includes('正解')) {
+        solutionBlocks.shift();
     }
 
-    const problems = problemSplits.map((problemBlock, index) => {
-        if (!problemBlock) return null;
+    if (problemBlocks.length === 0 || problemBlocks.length !== solutionBlocks.length) {
+        console.error('[Quiz Parser] Mismatch between problem and solution block counts.');
+        console.error('--- Problem Blocks Found: ---', problemBlocks.length);
+        problemBlocks.forEach((block, i) => console.error(`Block ${i}:\n`, JSON.stringify(block)));
+        console.error('--- Solution Blocks Found: ---', solutionBlocks.length);
+        solutionBlocks.forEach((block, i) => console.error(`Block ${i}:\n`, JSON.stringify(block)));
+        return null;
+    }
+
+    const problems = problemBlocks.map((problemBlock, index) => {
         const questionNumber = index + 1;
-        
-        const lines = problemBlock.trim().split('\n');
-        const questionText = lines[0].trim();
-        const choicesText = lines.slice(1).join(' '); // 全てを一行に結合
+        const solutionBlock = solutionBlocks[index];
 
+        if (!problemBlock || !solutionBlock) return null;
+
+        const questionTextMatch = problemBlock.match(/]\s*([^a-eａ-ｅ]+)/);
+        const questionText = questionTextMatch ? questionTextMatch[1].trim() : '';
+
+        // ★★★★★ 選択肢の解析方法を刷新 ★★★★★
         const choices = {};
-        // ★修正点: ラベルを区切り文字として、後続のテキストを抽出する方式に変更
-        const choiceRegex = /([a-eａ-ｅ])\s*[.．]?\s*(.*?)(?=\s*[a-eａ-ｅ]\s*[.．]?\s*|$)/g;
-        const matches = choicesText.matchAll(choiceRegex);
-
-        for (const match of matches) {
-            const label = match[1].normalize('NFKC').toLowerCase().replace(/[ａ-ｅ]/, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
-            choices[label] = match[2].trim();
+        const choicesMatch = problemBlock.match(/a\.\s[\s\S]+/);
+        if (choicesMatch) {
+            const choicesText = choicesMatch[0];
+            const choiceParts = choicesText.split(/\s+(?=[a-eａ-ｅ]\.)/);
+            choiceParts.forEach(part => {
+                const trimmedPart = part.trim();
+                if(trimmedPart.length > 2) {
+                    const label = trimmedPart.charAt(0);
+                    const text = trimmedPart.substring(2).trim();
+                    choices[label] = text;
+                }
+            });
         }
-
-        const solutionBlock = solutionSplits[index];
-        if (!solutionBlock) return null;
-
-        const correctRegex = /(?:解答|正解)[:：]\s*([a-eａ-ｅ])/;
-        const explanationRegex = /解説[:：]?\s*\n?([\s\S]+)/;
+        
+        const correctRegex = /(?:正解|正答)[:：]?\s*([a-eａ-ｅ])\.?.*/;
+        const explanationRegex = /解説[:：]?\s*([\s\S]+)/;
         
         const correctMatch = solutionBlock.match(correctRegex);
         const explanationMatch = solutionBlock.match(explanationRegex);
 
-        if (Object.keys(choices).length === 0) {
-            console.error(`[Quiz Parser - 問${questionNumber}] No choices found. Text was:`, `'${choicesText}'`);
-            return null;
-        }
-        if (!correctMatch) {
-            console.error(`[Quiz Parser - 問${questionNumber}] Correct answer not found.`);
-            return null;
-        }
-
-        const correctAnswerLabel = correctMatch[1].normalize('NFKC').toLowerCase().replace(/[ａ-ｅ]/, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+        if (!correctMatch || Object.keys(choices).length < 2) return null;
 
         return {
             questionNumber,
             questionText,
             choices,
-            correctAnswer: correctAnswerLabel,
-            explanation: explanationMatch ? explanationMatch[1].trim() : ''
+            correctAnswer: correctMatch[1],
+            explanation: explanationMatch ? explanationMatch[1].trim() : '解説が見つかりません。'
         };
     }).filter(p => p !== null);
 
-    if (problems.length === 0) {
-        console.error('[Quiz Parser] No valid problems could be parsed.');
-        return null;
-    }
+    if (problems.length === 0) return null;
 
     return { casePresentation, problems };
 
   } catch (error) {
-    console.error('[Quiz Parser] An unexpected error occurred:', error);
+    console.error('Quiz parsing error:', error);
     return null;
   }
 }
 
-// 抽出したデータからUIを構築する関数
+
+// 抽出したデータからUIを構築する関数 (変更なし)
 function buildQuizUI(quizData, originalContainer) {
     const originalContent = originalContainer.innerHTML;
     const quizContainer = document.createElement('div');
@@ -211,7 +206,7 @@ function buildQuizUI(quizData, originalContainer) {
     originalContainer.appendChild(quizContainer);
 }
 
-// UIのスタイルをページに注入する関数
+// UIのスタイルをページに注入する関数 (変更なし)
 function injectStyles() {
     const styleId = 'interactive-quiz-styles';
     if (document.getElementById(styleId)) return;
@@ -338,7 +333,7 @@ function activateViewer() {
 
     const quizData = parseQuizText(latestResponseElement.innerText);
 
-    if (quizData) {
+    if (quizData && quizData.problems.length > 0) {
         buildQuizUI(quizData, latestResponseElement);
         latestResponseElement.setAttribute(PROCESSED_MARKER, 'true');
         return { status: "success" };
